@@ -16,10 +16,34 @@ repositories {
 }
 
 dependencies {
+	// 스프링 부트
 	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+
+	// 롬복
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+
+	// 데브 툴
+	compileOnly("org.springframework.boot:spring-boot-devtools")
+
+	// h2
+	runtimeOnly 'com.h2database:h2'
+
+	// 스프링 데이터 JPA
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+	// 테스트
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+
 }
