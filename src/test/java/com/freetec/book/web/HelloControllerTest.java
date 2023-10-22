@@ -1,5 +1,6 @@
 package com.freetec.book.web;
 
+import com.freetec.book.config.auth.SecurityConfig;
 import com.freetec.book.web.dto.HelloResponseDto;
 import org.assertj.core.api.Assertions;
 import org.hamcrest.Matcher;
@@ -7,6 +8,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 //import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
@@ -16,12 +20,17 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.hamcrest.Matchers.is;
 
-@WebMvcTest(controllers = HelloController.class)
+@WebMvcTest(controllers = HelloController.class,
+excludeFilters = {
+        @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE,
+        classes = SecurityConfig.class)
+})
 class HelloControllerTest {
     @Autowired
     private MockMvc mvc;
     @Test
-    @DisplayName("hello_return")
+    @DisplayName("hello가_리턴된다")
+    @WithMockUser(roles = "USER")
     void helloReturn() throws Exception {
         //given
         mvc.perform(get("/hello"))
@@ -31,7 +40,8 @@ class HelloControllerTest {
 
 
     @Test
-    @DisplayName("lombok_func_test")
+    @DisplayName("롬복_기능테스트")
+    @WithMockUser(roles = "USER")
     void lombokFuncTest() throws Exception {
         //given
         String name = "안녕";
@@ -44,7 +54,8 @@ class HelloControllerTest {
     }
 
     @Test
-    @DisplayName("return helloDto")
+    @DisplayName("helloDto가_리턴된다")
+    @WithMockUser(roles = "USER")
     void returnHelloDto() throws Exception {
         //given
         String name = "kim";

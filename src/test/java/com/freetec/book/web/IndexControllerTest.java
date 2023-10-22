@@ -3,44 +3,77 @@ package com.freetec.book.web;
 import com.freetec.book.service.posts.PostsService;
 import com.freetec.book.web.dto.PostsSaveRequestDto;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.RequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
+@AutoConfigureMockMvc
 class IndexControllerTest {
     @Autowired
     private TestRestTemplate restTemplate;
     @Autowired
     private PostsService postsService;
+    @Autowired
+    private WebApplicationContext context;
+    @Autowired
+    private MockMvc mvc;
+
+    @BeforeEach
+    public void setUp(){
+        this.mvc = MockMvcBuilders
+                .webAppContextSetup(context)
+                .apply(springSecurity())
+                .build();
+    }
     @Test
-    @DisplayName("load_main_page")
+    @DisplayName("메인페이지_로딩")
+    @WithMockUser(roles = "USER")
     void loadMainPage() throws Exception {
         //when
         String body = this.restTemplate.getForObject("/", String.class);
         //then
-        assertThat(body).contains("스프링 부트로 시작하는 웹 서비스");
+//        assertThat(body).contains("스프링 부트로 시작하는 웹 서비스");
+
+        mvc.perform(get("/"))
+                .andExpect(content().string(containsString("스프링 부트로 시작하는 웹 서비스")));
+
     }
     @Test
-    @DisplayName("load_save_page")
+    @DisplayName("저장페이지_로딩")
+    @WithMockUser(roles = "USER")
     void loadSavePage() throws Exception {
         //when
         String body = this.restTemplate.getForObject("/posts/save", String.class);
         //then
-        assertThat(body).contains("게시글 등록");
-        assertThat(body).contains("제목");
-        assertThat(body).contains("작성자");
-        assertThat(body).contains("내용");
+        mvc.perform(get("/posts/save"))
+                .andExpect(content().string(containsString("게시글 등록")))
+                .andExpect(content().string(containsString("제목")))
+                .andExpect(content().string(containsString("작성자")))
+                .andExpect(content().string(containsString("내용")));
     }
     @Test
-    @DisplayName("load_modify_page")
+    @DisplayName("수정페이지_로딩")
+    @WithMockUser(roles = "USER")
     void loadModifyPage() throws Exception {
         //given
         Long savedId = postsService.save(PostsSaveRequestDto.builder()
@@ -49,11 +82,12 @@ class IndexControllerTest {
                 .author("author")
                 .build());
         //when
-        String body = this.restTemplate.getForObject("/posts/update/" +savedId, String.class);
+        String url = "/posts/update/" +savedId;
         //then
-        assertThat(body).contains("게시글 수정");
-        assertThat(body).contains("title");
-        assertThat(body).contains("content");
-        assertThat(body).contains("author");
+        mvc.perform(get(url))
+                .andExpect(content().string(containsString("게시글 수정")))
+                .andExpect(content().string(containsString("title")))
+                .andExpect(content().string(containsString("content")))
+                .andExpect(content().string(containsString("author")));
     }
 }
