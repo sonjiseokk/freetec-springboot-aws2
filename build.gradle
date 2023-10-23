@@ -54,9 +54,8 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
-jar {
-	enable = false
-}
+bootJar.enabled=false
+jar.enabled=true
 
 configurations {
 	compileOnly {
