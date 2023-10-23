@@ -46,6 +46,9 @@ dependencies {
 	// 스프링 세션 저장소
 	implementation 'org.springframework.session:spring-session-jdbc'
 
+	// 마리아DB
+	implementation("org.mariadb.jdbc:mariadb-java-client:2.1.2")
+
 	// 스프링 시큐리티 테스트
 	testImplementation 'org.springframework.security:spring-security-test'
 
