@@ -26,6 +26,15 @@ public class IndexController {
         }
         return "index";
     }
+    @GetMapping("/mainpage")
+    public String mainpage(Model model, @LoginUser SessionUser user) {
+        model.addAttribute("posts", postsService.findAllDesc());
+
+        if (user != null) {
+            model.addAttribute("userName", user.getName());
+        }
+        return "index";
+    }
     @GetMapping("/posts/save")
     public String postsSave() {
         return "posts-save";
