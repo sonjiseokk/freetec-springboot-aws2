@@ -31,7 +31,7 @@ notifications:
       - thswltjr11@gmail.com
 
 before_deploy:
-  - zip -r freelec-springboot2-aws2 *
+  - zip -r freelec-springboot-aws2 *
   - mkdir -p deploy
   - mv freelec-springboot-aws2.zip deploy/freelec-springboot-aws2.zip
 
