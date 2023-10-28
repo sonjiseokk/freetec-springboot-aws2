@@ -11,6 +11,7 @@ import javax.persistence.*;
 @Entity(name = "users")
 public class User {
     @Id
+    @Column(name = "users_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -38,11 +39,14 @@ public class User {
     public User update(String name, String picture) {
         this.name = name;
         this.picture = picture;
-
         return this;
     }
 
     public String getRoleKey() {
         return this.role.getKey();
+    }
+
+    public void gradeRole() {
+        this.role = Role.USER;
     }
 }

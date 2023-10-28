@@ -2,6 +2,9 @@ package com.freetec.book.web;
 
 import com.freetec.book.config.auth.dto.SessionUser;
 import com.freetec.book.service.posts.PostsService;
+import com.freetec.book.web.domain.UserRepository;
+import com.freetec.book.web.domain.user.Role;
+import com.freetec.book.web.domain.user.User;
 import com.freetec.book.web.dto.PostsSaveRequestDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -32,11 +35,20 @@ class IndexControllerTest {
     @Autowired
     private WebApplicationContext context;
     @Autowired
+    private UserRepository userRepository;
+    @Autowired
     private MockMvc mvc;
 
-    private MockHttpSession createMockSession(SessionUser user) {
+    private MockHttpSession createMockSession() {
         MockHttpSession session = new MockHttpSession();
-        session.setAttribute("user", user); // 'user'는 세션에서 사용자 정보를 찾을 때 사용하는 키입니다.
+        User user = userRepository.save(User.builder()
+                .email("email")
+                .name("name")
+                .picture("pic")
+                .role(Role.USER)
+                .build());
+        SessionUser sessionUser = new SessionUser(user);
+        session.setAttribute("user", sessionUser);
         return session;
     }
     @BeforeEach
@@ -59,19 +71,22 @@ class IndexControllerTest {
                 .andExpect(content().string(containsString("스프링 부트로 시작하는 웹 서비스")));
 
     }
-//    @Test
-//    @DisplayName("저장페이지_로딩")
-//    @WithMockUser(roles = "USER")
-//    void loadSavePage() throws Exception {
-//
-//        //when
-//        String body = this.restTemplate.getForObject("/posts/save", String.class);
-//        //then
-//        mvc.perform(get("/posts/save"))
-//                .andExpect(content().string(containsString("게시글 등록")))
-//                .andExpect(content().string(containsString("제목")))
-//                .andExpect(content().string(containsString("내용")));
-//    }
+    @Test
+    @DisplayName("저장페이지_로딩")
+    @WithMockUser(roles = "USER")
+    void loadSavePage() throws Exception {
+        //given
+        MockHttpSession session = createMockSession();
+        //when
+        String body = this.restTemplate.getForObject("/posts/save", String.class);
+        //when & then
+        mvc.perform(get("/posts/save")
+                        .session(session)) // 세션 정보 전달
+                .andExpect(content().string(containsString("게시글 등록")))
+                .andExpect(content().string(containsString("제목")))
+                .andExpect(content().string(containsString("name")))
+                .andExpect(content().string(containsString("내용")));
+    }
     @Test
     @DisplayName("수정페이지_로딩")
     @WithMockUser(roles = "USER")
